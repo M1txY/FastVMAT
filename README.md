@@ -34,8 +34,7 @@
     │   ├── glass_albedo.png
     │   ├── glass_translucency.png
     ```
-3. **Umodel** installé et accessible dans le répertoire de travail. Téléchargez **Umodel** depuis [Umodel official website](https://www.gildor.org/en/projects/umodel).
-4. Un fichier de configuration `config.py` pour personnaliser les suffixes et les paramètres par défaut.
+3. Un fichier de configuration `config.py` pour personnaliser les suffixes et les paramètres par défaut.
 
 ---
 
