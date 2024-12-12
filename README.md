@@ -1,25 +1,25 @@
 # FastVMAT
 
-**FastVMAT** est un outil Python avancé conçu pour simplifier et accélérer l'importation de nombreux matériaux dans **S&box** en générant automatiquement des fichiers `.vmat` compatibles avec le moteur **Source 2**. Il analyse vos textures organisées dans des sous-dossiers et crée les fichiers nécessaires en utilisant des configurations personnalisables. De plus, il intègre des fonctionnalités avancées telles que la séparation des canaux MRA et l'extraction des textures depuis les fichiers `.uasset`.
+**FastVMAT** is an advanced Python tool designed to simplify and accelerate the import of numerous materials into **S&box** by automatically generating `.vmat` files compatible with the **Source 2** engine. It analyzes your textures organized into subfolders and creates the necessary files using customizable configurations. Additionally, it integrates advanced features such as MRA channel separation and texture extraction from `.uasset` files.
 
 ---
 
-## Fonctionnalités
+## Features
 
-- 🚀 **Génération rapide** : Crée automatiquement des fichiers `.vmat` pour chaque sous-dossier contenant des textures.
-- 🔍 **Détection par suffixes** : Analyse les noms des textures pour les mapper aux paramètres correspondants (albedo, normal, roughness, etc.).
-- ⚙️ **Personnalisation facile** : Configurez les suffixes et les paramètres via un fichier `config.py`.
-- 🌟 **Compatibilité Source 2** : Adapté aux besoins des projets S&box et autres jeux utilisant Source 2.
-- 🔄 **Conversion automatique DDS et TGA en PNG** : Détecte et convertit les fichiers `.dds`, `.dss` ou `.tga` en `.png` avant traitement.
-- 🎨 **Séparation des canaux MRA** : Sépare les canaux R, G et B des textures MRA en fichiers PNG distincts pour Metalness, Roughness et AO.
-- 🛠️ **Extraction des textures depuis les fichiers `.uasset`** : Utilise **Umodel** pour extraire les textures des fichiers `.uasset` et les convertir en `.png`.
+- 🚀 **Fast Generation**: Automatically creates `.vmat` files for each subfolder containing textures.
+- 🔍 **Suffix-Based Detection**: Analyzes texture names to map them to corresponding parameters (albedo, normal, roughness, etc.).
+- ⚙️ **Easy Customization**: Configure suffixes and parameters via a `config.py` file.
+- 🌟 **Source 2 Compatibility**: Tailored to the needs of S&box projects and other games using Source 2.
+- 🔄 **Automatic DDS and TGA to PNG Conversion**: Detects and converts `.dds`, `.dss`, or `.tga` files to `.png` before processing.
+- 🎨 **MRA Channel Separation**: Splits the R, G, and B channels of MRA textures into separate PNG files for Metalness, Roughness, and AO.
+- 🛠️ **Texture Extraction from `.uasset` Files**: Uses **Umodel** to extract textures from `.uasset` files and convert them to `.png`.
 
 ---
 
-## Prérequis
+## Prerequisites
 
-1. **Python 3.x** installé sur votre système.
-2. Une structure de dossiers organisée sous un dossier `materials` :
+1. **Python 3.x** installed on your system.
+2. An organized folder structure under a `materials` directory:
     ```
     materials/
     ├── wood_material/
@@ -34,33 +34,33 @@
     │   ├── glass_albedo.png
     │   ├── glass_translucency.png
     ```
-3. Un fichier de configuration `config.py` pour personnaliser les suffixes et les paramètres par défaut.
+3. A `config.py` configuration file to customize suffixes and default parameters.
 
 ---
 
 ## Installation
 
-1. Clonez ou téléchargez ce projet dans votre répertoire de travail :
+1. Clone or download this project to your working directory:
     ```bash
     git clone https://github.com/M1txY/FastVMAT.git
     cd FastVMAT
     ```
 
-2. Installez Python si ce n'est pas déjà fait :
-    - [Téléchargez Python ici](https://www.python.org/downloads/).
+2. Install Python if it's not already installed:
+    - [Download Python here](https://www.python.org/downloads/).
 
-3. Installez les dépendances nécessaires via `requirements.txt` :
+3. Install the necessary dependencies via `requirements.txt`:
     ```bash
     pip install -r requirements.txt
     ```
 
-4. Assurez-vous que **Umodel** (`umodel_64.exe` pour Windows ou la version appropriée pour votre système) est placé dans le répertoire racine du projet ou ajustez le chemin dans le script si nécessaire.
+4. Ensure that **Umodel** (`umodel_64.exe` for Windows or the appropriate version for your system) is placed in the root directory of the project or adjust the path in the script if necessary.
 
 ---
 
 ## Configuration
 
-1. **config.py** : Personnalisez les mappings des textures et les paramètres par défaut en modifiant le fichier `config.py`. Exemple :
+1. **config.py**: Customize texture mappings and default parameters by modifying the `config.py` file. Example:
     ```python
     TEXTURE_MAPPING = {
         "TextureColor": ["albedo", "diffuse"],
@@ -91,11 +91,11 @@
 
 ---
 
-## Utilisation
+## Usage
 
-1. **Préparation des textures** :
-    - Placez vos textures dans des sous-dossiers sous `materials/`. Chaque sous-dossier doit contenir les textures pour un matériau unique.
-    - Exemple de structure :
+1. **Prepare Textures**:
+    - Place your textures in subfolders under `materials/`. Each subfolder should contain textures for a unique material.
+    - Example structure:
         ```
         materials/
         ├── wood_material/
@@ -111,50 +111,50 @@
         │   ├── glass_translucency.png
         ```
 
-2. **Extraction des textures depuis les fichiers `.uasset`** (si applicable) :
-    - Assurez-vous que vos fichiers `.uasset` sont placés dans les dossiers appropriés sous `materials/`.
-    - **Umodel** sera utilisé pour extraire les textures lors de l'exécution du script.
+2. **Extract Textures from `.uasset` Files** (if applicable):
+    - Ensure that your `.uasset` files are placed in the appropriate folders under `materials/`.
+    - **Umodel** will be used to extract textures during the script execution.
 
-3. **Exécution du script Python** :
+3. **Run the Python Script**:
     ```bash
     python script.py
     ```
 
-4. **Ce que fait le script** :
-    - Analyse chaque sous-dossier dans `materials`.
-    - Identifie les textures en fonction de leurs suffixes définis dans `config.py`.
-    - Convertit les fichiers `.dds`, `.dss` ou `.tga` en `.png` si nécessaire.
-    - Sépare les canaux R, G et B des textures MRA en fichiers PNG distincts pour Metalness, Roughness et AO.
-    - Extrait les textures des fichiers `.uasset` en utilisant **Umodel**.
-    - Génère un fichier `.vmat` pour chaque sous-dossier avec les paramètres et les chemins des textures appropriés.
+4. **What the Script Does**:
+    - Analyzes each subfolder in `materials`.
+    - Identifies textures based on their suffixes defined in `config.py`.
+    - Converts `.dds`, `.dss`, or `.tga` files to `.png` if necessary.
+    - Splits the R, G, and B channels of MRA textures into separate PNG files for Metalness, Roughness, and AO.
+    - Extracts textures from `.uasset` files using **Umodel**.
+    - Generates a `.vmat` file for each subfolder with the appropriate parameters and texture paths.
 
-5. **Résultat** :
-    - Pour chaque sous-dossier de `materials/`, un fichier `.vmat` sera généré contenant les références aux textures traitées.
+5. **Result**:
+    - For each subfolder in `materials/`, a `.vmat` file will be generated containing references to the processed textures.
 
 ---
 
-## Dépendances
+## Dependencies
 
-Ce projet utilise les bibliothèques suivantes :
+This project uses the following libraries:
 
-- **Pillow** : Pour le traitement des images.
-- **Umodel** : Pour l'extraction des textures depuis les fichiers `.uasset`.
+- **Pillow**: For image processing.
+- **Umodel**: For extracting textures from `.uasset` files.
 
-Vous pouvez installer les dépendances Python à l'aide du fichier `requirements.txt` :
+You can install the Python dependencies using the `requirements.txt` file:
 ```bash
 pip install -r requirements.txt
 ```
 
-### Contenu de `requirements.txt` :
+### Contents of `requirements.txt`:
 ```
 Pillow
 ```
 
 ---
 
-## Exemple de Résultat
+## Example Result
 
-### Structure initiale
+### Initial Structure
 
 ```
 materials/
@@ -164,7 +164,7 @@ materials/
 │   ├── wood_roughness.dds
 ```
 
-### Résultat après exécution
+### Result After Execution
 
 ```
 materials/
@@ -178,7 +178,7 @@ materials/
 │   ├── wood_material.vmat
 ```
 
-### Contenu du fichier `.vmat`
+### Contents of the `.vmat` File
 
 ```plaintext
 // THIS FILE IS AUTO-GENERATED
@@ -219,36 +219,36 @@ Layer0
 
 ## FAQ
 
-### Mes textures ne sont pas détectées. Pourquoi ?
+### My textures are not being detected. Why?
 
-- **Vérifiez les suffixes** : Assurez-vous que les noms de fichiers contiennent les suffixes définis dans `TEXTURE_MAPPING` de `config.py`.
-- **Extensions reconnues** : Assurez-vous que vos fichiers ont des extensions reconnues (`.png`, `.jpg`, `.jpeg`, `.tga`, `.dds`, `.dss`).
-- **Structure des dossiers** : Vérifiez que vos textures sont placées dans des sous-dossiers corrects sous `materials/`.
+- **Check Suffixes**: Ensure that the filenames contain the suffixes defined in `TEXTURE_MAPPING` in `config.py`.
+- **Recognized Extensions**: Make sure your files have recognized extensions (`.png`, `.jpg`, `.jpeg`, `.tga`, `.dds`, `.dss`).
+- **Folder Structure**: Verify that your textures are placed in the correct subfolders under `materials/`.
 
-### Puis-je utiliser ce script pour d'autres jeux Source 2 ?
+### Can I use this script for other Source 2 games?
 
-- **Oui**, tant que vous respectez les structures de fichiers et les shaders compatibles avec Source 2.
+- **Yes**, as long as you adhere to the file structures and shaders compatible with Source 2.
 
-### Comment personnaliser les paramètres par défaut ?
+### How can I customize the default parameters?
 
-- **Modifiez `config.py`** : Ajustez les mappings des textures et les paramètres par défaut selon vos besoins dans le fichier `config.py`.
+- **Modify `config.py`**: Adjust the texture mappings and default parameters as needed in the `config.py` file.
 
-### Que faire si l'extraction des `.uasset` échoue ?
+### What should I do if extracting `.uasset` files fails?
 
-- **Vérifiez Umodel** : Assurez-vous que **Umodel** est correctement installé et accessible.
-- **Compatibilité des fichiers** : Certains fichiers `.uasset` peuvent ne pas être compatibles avec **Umodel**. Vérifiez la documentation de **Umodel** pour plus de détails.
+- **Check Umodel**: Ensure that **Umodel** is correctly installed and accessible.
+- **File Compatibility**: Some `.uasset` files might not be compatible with **Umodel**. Check the **Umodel** documentation for more details.
 
 ---
 
 ## Contribution
 
-N'hésitez pas à proposer des améliorations ou à signaler des problèmes en ouvrant une [issue](https://github.com/M1txY/FastVMAT/issues) ou en soumettant une [pull request](https://github.com/M1txY/FastVMAT/pulls).
+Feel free to propose improvements or report issues by opening an [issue](https://github.com/M1txY/FastVMAT/issues) or submitting a [pull request](https://github.com/M1txY/FastVMAT/pulls).
 
 ---
 
-### Changements récents :
+### Recent Changes:
 
-1. **Ajout de la séparation des canaux MRA** : Les textures MRA sont désormais séparées en Metalness, Roughness et AO.
-2. **Extraction des textures depuis les fichiers `.uasset`** : Intégration de **Umodel** pour extraire et convertir automatiquement les textures.
-3. **Conversion des fichiers TGA en PNG** : Ajout de la conversion automatique des fichiers `.tga` en `.png`.
-4. **Mise à jour des instructions d'installation et d'utilisation** : Documentation améliorée pour refléter les nouvelles fonctionnalités.
+1. **Added MRA Channel Separation**: MRA textures are now split into Metalness, Roughness, and AO.
+2. **Texture Extraction from `.uasset` Files**: Integrated **Umodel** to automatically extract and convert textures.
+3. **TGA to PNG File Conversion**: Added automatic conversion of `.tga` files to `.png`.
+4. **Updated Installation and Usage Instructions**: Improved documentation to reflect new features.
