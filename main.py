@@ -24,7 +24,6 @@ def split_mra_texture(mra_path, target_folder):
             g_path = os.path.join(target_folder, f"{base_name}_Roughness.png")
             b_path = os.path.join(target_folder, f"{base_name}_AO.png")
             
-            
             r.save(r_path)
             g.save(g_path)
             b.save(b_path)
@@ -62,8 +61,9 @@ def extract_uasset_to_png(umodel_path, folder_path):
                     shutil.rmtree(export_folder) 
                     print(f"Supprimé : {export_folder}")
                 
-                os.remove(input_path)
-                print(f"Supprimé : {file_name}")
+                if os.path.exists(input_path):
+                    os.remove(input_path)
+                    print(f"Supprimé : {file_name}")
 
             except subprocess.CalledProcessError as e:
                 print(f"Erreur lors de l'extraction pour {file_name}: {e}")
@@ -111,7 +111,7 @@ def process_texture_folder(folder_path):
         if r_path and g_path and b_path:
             textures["TextureMetalness"] = os.path.relpath(r_path, "materials").replace("\\", "/")
             textures["TextureRoughness"] = os.path.relpath(g_path, "materials").replace("\\", "/")
-            textures["TextureAO"] = os.path.relpath(b_path, "materials").replace("\\", "/")
+            textures["TextureAmbientOcclusion"] = os.path.relpath(b_path, "materials").replace("\\", "/")
             
             options["F_METALNESS_TEXTURE"] = True
             print("Textures MRA remplacées par Metalness, Roughness et AO.")
@@ -124,15 +124,23 @@ def process_texture_folder(folder_path):
             if texture_relative_path in textures.values():
                 continue
 
+            assigned = False
             for texture_key, suffix_list in TEXTURE_MAPPING.items():
                 if any(suffix in file.lower() for suffix in suffix_list):
+                    if texture_key == "TextureColor" and any(suffix in file.lower() for suffix in TEXTURE_MAPPING["TextureAmbientOcclusion"]):
+                        print(f"Ignoré : {file} car détecté comme AO, non Base Color.")
+                        continue
+                    if textures.get(texture_key):
+                        print(f"Avertissement : Une texture est déjà assignée pour {texture_key}.")
+                        continue
                     relative_path = os.path.join(
                         "materials",
                         os.path.relpath(folder_path, "materials"),
                         file
                     ).replace("\\", "/")
                     textures[texture_key] = relative_path
-                    
+                    assigned = True
+                    # Active les options en fonction de la texture détectée
                     if texture_key == "TextureSelfIllumMask":
                         options["F_SELF_ILLUM"] = True
                     if texture_key == "TextureMetalness":
@@ -140,6 +148,8 @@ def process_texture_folder(folder_path):
                     if texture_key == "TextureSpecular":
                         options["F_SPECULAR"] = True
                     break
+            if not assigned:
+                print(f"Aucune correspondance trouvée pour : {file}")
     
     vmat_content = ["// THIS FILE IS AUTO-GENERATED\n", "Layer0\n{\n"]
     vmat_content.append(f'\tshader "{DEFAULT_PARAMETERS["shader"]}"\n\n')

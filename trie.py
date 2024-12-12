@@ -20,5 +20,5 @@ def organize_textures_by_prefix(folder_path):
     
     print(f"Organisation terminée dans le dossier {folder_path}")
 
-folder_path = "texture_opera" 
+folder_path = "Textures" 
 organize_textures_by_prefix(folder_path)
