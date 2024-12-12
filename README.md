@@ -150,8 +150,6 @@ pip install -r requirements.txt
 Pillow
 ```
 
-**Note** : **Umodel** doit être téléchargé séparément depuis le [site officiel](https://www.gildor.org/en/projects/umodel).
-
 ---
 
 ## Exemple de Résultat
