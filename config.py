@@ -1,9 +1,9 @@
 # Mapping des textures avec leurs suffixes associés
 
 TEXTURE_MAPPING = {
-    "TextureColor": ["_albedo", "_diffuse", "_basecolor", "_color", "_col", "_bc", "_diff", "_A"],
+    "TextureColor": ["_albedo", "_diffuse", "_basecolor", "_color", "_col", "_bc", "_diff", "_a"],
     "TextureAmbientOcclusion": ["_ao", "_ambientocclusion", "_occlusion", "_ambocc", "_aoc", "_occl"],
-    "TextureNormal": ["_normal", "_nor", "_norm", "_nrm", "_normalmap", "_nml", "_bump", "_N"],
+    "TextureNormal": ["_normal", "_nor", "_norm", "_nrm", "_normalmap", "_nml", "_bump", "_n"],
     "TextureRoughness": ["_roughness", "_rou", "_rgh", "_gloss", "_gls", "_rough", "_specular"],
     "TextureMetalness": ["_metallic", "_met", "_metal", "_mtl", "_metalness", "_metall"],
     "TextureSelfIllumMask": ["_selfillum", "_illum", "_glowmask", "_emit", "_emissive", "_light"],
