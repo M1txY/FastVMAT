@@ -1,4 +1,3 @@
-
 # FastVMAT
 
 **FastVMAT** est un outil Python conçu pour simplifier et accélérer l'importation de nombreux matériaux dans **S&box** en générant automatiquement des fichiers `.vmat` compatibles avec le moteur **Source 2**. Il analyse vos textures organisées dans des sous-dossiers et crée les fichiers nécessaires en utilisant des configurations personnalisables.
@@ -11,6 +10,7 @@
 - 🔍 **Détection par suffixes** : Analyse les noms des textures pour les mapper aux paramètres correspondants (albedo, normal, roughness, etc.).
 - ⚙️ **Personnalisation facile** : Configurez les suffixes et les paramètres via un fichier `config.py`.
 - 🌟 **Compatibilité Source 2** : Adapté aux besoins des projets S&box et autres jeux utilisant Source 2.
+- 🔄 **Conversion automatique DDS en PNG** : Détecte et convertit les fichiers `.dds` ou `.dss` en `.png` avant traitement.
 
 ---
 
@@ -37,56 +37,6 @@
 
 ---
 
-## Configuration
-
-### Modifier les Suffixes
-
-Le fichier `config.py` contient la configuration des suffixes utilisés pour détecter les textures. Voici un exemple de configuration par défaut :
-
-```python
-TEXTURE_MAPPING = {
-    "TextureColor": ["_albedo", "_diffuse", "_basecolor", "_color", "_col", "_bc", "_diff"],
-    "TextureAmbientOcclusion": ["_ao", "_ambientocclusion", "_occlusion", "_ambocc", "_aoc", "_occl"],
-    "TextureNormal": ["_normal", "_nor", "_norm", "_nrm", "_normalmap", "_nml", "_bump"],
-    "TextureRoughness": ["_roughness", "_rou", "_rgh", "_gloss", "_gls", "_rough", "_specular"],
-    "TextureMetalness": ["_metallic", "_met", "_metal", "_mtl", "_metalness", "_metall"],
-    "TextureSelfIllumMask": ["_selfillum", "_illum", "_glowmask", "_emit", "_emissive", "_light"],
-    "TextureTranslucency": ["_translucent", "_trans", "_opacity", "_opa", "_alpha"]
-}
-```
-
-Si vos textures utilisent des suffixes différents, modifiez-les dans `TEXTURE_MAPPING`. Par exemple :
-```python
-TEXTURE_MAPPING = {
-    "TextureColor": ["_base"],
-    "TextureNormal": ["_normmap"]
-}
-```
-
-### Modifier les Paramètres par Défaut
-
-Les paramètres par défaut pour les fichiers `.vmat` sont définis dans `config.py` :
-
-```python
-DEFAULT_PARAMETERS = {
-    "shader": "complex.shader",
-    "g_flAmbientOcclusionDirectDiffuse": "0.000",
-    "g_flAmbientOcclusionDirectSpecular": "0.000",
-    "g_flModelTintAmount": "1.000",
-    "g_vColorTint": "[1.000000 1.000000 1.000000 0.000000]",
-    "g_flFadeExponent": "1.000",
-    "g_bFogEnabled": "1",
-    "g_flRoughnessScaleFactor": "1.000",
-    "g_nScaleTexCoordUByModelScaleAxis": "0",
-    "g_nScaleTexCoordVByModelScaleAxis": "0",
-    "g_vTexCoordOffset": "[0.000 0.000]",
-    "g_vTexCoordScale": "[1.000 1.000]",
-    "g_vTexCoordScrollSpeed": "[0.000 0.000]"
-}
-```
-
----
-
 ## Installation
 
 1. Clonez ou téléchargez ce projet dans votre répertoire de travail :
@@ -98,6 +48,10 @@ DEFAULT_PARAMETERS = {
 2. Installez Python si ce n'est pas déjà fait :
    - [Téléchargez Python ici](https://www.python.org/downloads/).
 
+3. Installez les dépendances nécessaires via `requirements.txt` :
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ---
 
@@ -113,7 +67,19 @@ DEFAULT_PARAMETERS = {
 3. Le script va :
    - Analyser chaque sous-dossier dans `materials`.
    - Identifier les textures en fonction de leurs suffixes.
+   - Convertir les fichiers `.dds` ou `.dss` en `.png` si nécessaire.
    - Générer un fichier `.vmat` pour chaque sous-dossier.
+
+---
+
+## Dépendances
+
+Ce projet utilise la bibliothèque **Pillow** pour le traitement des images. Vous pouvez installer cette dépendance et les autres nécessaires à l'aide du fichier `requirements.txt`.
+
+### Installer les dépendances :
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
@@ -124,9 +90,9 @@ DEFAULT_PARAMETERS = {
 ```
 materials/
 ├── wood_material/
-│   ├── wood_albedo.png
-│   ├── wood_normal.png
-│   ├── wood_roughness.png
+│   ├── wood_albedo.dds
+│   ├── wood_normal.dds
+│   ├── wood_roughness.dds
 ```
 
 ### Résultat après exécution
@@ -178,7 +144,7 @@ Layer0
 
 ### Mes textures ne sont pas détectées. Pourquoi ?
 - Vérifiez que les noms de fichiers contiennent les suffixes définis dans `TEXTURE_MAPPING`.
-- Assurez-vous que vos fichiers ont des extensions reconnues (`.png`, `.jpg`, `.tga`, etc.).
+- Assurez-vous que vos fichiers ont des extensions reconnues (`.png`, `.jpg`, `.tga`, `.dds`, etc.).
 
 ### Puis-je utiliser ce script pour d'autres jeux Source 2 ?
 - Oui, tant que vous respectez les structures de fichiers et les shaders compatibles avec Source 2.
@@ -189,3 +155,10 @@ Layer0
 
 N'hésitez pas à proposer des améliorations ou à signaler des problèmes en ouvrant une issue ou en soumettant une pull request.
 
+---
+
+### Changements :
+1. **Section Dépendances** : Ajout d'instructions pour installer les dépendances avec `requirements.txt`.
+2. **Conversion automatique DDS en PNG** : Mention explicite de la fonctionnalité dans la description et les étapes d'utilisation.
+
+N'hésitez pas à demander des ajustements si nécessaire ! 😊
