@@ -1,5 +1,20 @@
 import os
+from PIL import Image
 from config import TEXTURE_MAPPING, DEFAULT_PARAMETERS
+
+def convert_dds_to_png(file_path):
+    if not file_path.endswith(".dds"):
+        return file_path
+
+    try:
+        with Image.open(file_path) as img:
+            png_path = file_path.replace(".dds", ".png")
+            img.save(png_path, format="PNG")
+            print(f"Converti : {file_path} -> {png_path}")
+            return png_path
+    except Exception as e:
+        print(f"Erreur lors de la conversion de {file_path} : {e}")
+        return None
 
 def process_texture_folder(folder_path):
     textures = {}
@@ -13,7 +28,15 @@ def process_texture_folder(folder_path):
     }
 
     for file in os.listdir(folder_path):
-        if file.endswith((".png", ".jpg", ".jpeg", ".tga")):
+        if file.endswith((".png", ".jpg", ".jpeg", ".tga", ".dds", ".dss")):
+            # Si un fichier .dds ou .dss est détecté, il est converti en .png
+            if file.endswith((".dds", ".dss")):
+                original_path = os.path.join(folder_path, file)
+                converted_path = convert_dds_to_png(original_path)
+                if converted_path is None:
+                    continue  # Ignore les fichiers non convertibles.
+                file = os.path.basename(converted_path)
+
             for texture_key, suffix_list in TEXTURE_MAPPING.items():
                 if any(suffix in file.lower() for suffix in suffix_list):
                     relative_path = os.path.join(
