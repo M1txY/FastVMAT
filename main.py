@@ -1,35 +1,7 @@
 import os
+from config import TEXTURE_MAPPING, DEFAULT_PARAMETERS
 
-# Mapping des textures et suffixes
-texture_mapping = {
-    "TextureColor": ["_albedo", "_diffuse", "_basecolor", "_color", "_col", "_bc", "_diff"],
-    "TextureAmbientOcclusion": ["_ao", "_ambientocclusion", "_occlusion", "_ambocc", "_aoc", "_occl"],
-    "TextureNormal": ["_normal", "_nor", "_norm", "_nrm", "_normalmap", "_nml", "_bump"],
-    "TextureRoughness": ["_roughness", "_rou", "_rgh", "_gloss", "_gls", "_rough", "_specular"],
-    "TextureMetalness": ["_metallic", "_met", "_metal", "_mtl", "_metalness", "_metall"],
-    "TextureSelfIllumMask": ["_selfillum", "_illum", "_glowmask", "_emit", "_emissive", "_light"],
-    "TextureTranslucency": ["_translucent", "_trans", "_opacity", "_opa", "_alpha"],
-}
-
-# Paramètres par défaut
-default_parameters = {
-    "shader": "complex.shader",
-    "g_flAmbientOcclusionDirectDiffuse": "0.000",
-    "g_flAmbientOcclusionDirectSpecular": "0.000",
-    "g_flModelTintAmount": "1.000",
-    "g_vColorTint": "[1.000000 1.000000 1.000000 0.000000]",
-    "g_flFadeExponent": "1.000",
-    "g_bFogEnabled": "1",
-    "g_flRoughnessScaleFactor": "1.000",
-    "g_nScaleTexCoordUByModelScaleAxis": "0",
-    "g_nScaleTexCoordVByModelScaleAxis": "0",
-    "g_vTexCoordOffset": "[0.000 0.000]",
-    "g_vTexCoordScale": "[1.000 1.000]",
-    "g_vTexCoordScrollSpeed": "[0.000 0.000]",
-}
-
-def process_texture_folder(folder_path, suffixes):
-    """Traite un dossier pour générer un fichier .vmat basé sur les textures détectées."""
+def process_texture_folder(folder_path):
     textures = {}
     base_name = os.path.basename(folder_path)
 
@@ -42,7 +14,7 @@ def process_texture_folder(folder_path, suffixes):
 
     for file in os.listdir(folder_path):
         if file.endswith((".png", ".jpg", ".jpeg", ".tga")):
-            for texture_key, suffix_list in texture_mapping.items():
+            for texture_key, suffix_list in TEXTURE_MAPPING.items():
                 if any(suffix in file.lower() for suffix in suffix_list):
                     relative_path = os.path.join(
                         "materials",
@@ -62,7 +34,7 @@ def process_texture_folder(folder_path, suffixes):
 
     # Contenu du fichier .vmat
     vmat_content = ["// THIS FILE IS AUTO-GENERATED\n", "Layer0\n{\n"]
-    vmat_content.append(f'\tshader "{default_parameters["shader"]}"\n\n')
+    vmat_content.append(f'\tshader "{DEFAULT_PARAMETERS["shader"]}"\n\n')
 
     # Ajoute les options activées
     for option, enabled in options.items():
@@ -72,7 +44,7 @@ def process_texture_folder(folder_path, suffixes):
         vmat_content.append('\tg_flMetalness "0.000"\n')
 
     # Ajoute les paramètres par défaut
-    for param, value in default_parameters.items():
+    for param, value in DEFAULT_PARAMETERS.items():
         vmat_content.append(f'\t{param} "{value}"\n')
 
     # Ajoute les textures détectées
@@ -96,7 +68,7 @@ def main():
     for folder_name in os.listdir(root_folder):
         folder_path = os.path.join(root_folder, folder_name)
         if os.path.isdir(folder_path):
-            process_texture_folder(folder_path, texture_mapping)
+            process_texture_folder(folder_path)
 
 if __name__ == "__main__":
     main()
