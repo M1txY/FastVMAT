@@ -19,9 +19,11 @@ def split_mra_texture(mra_path, target_folder):
             r, g, b = img.split()
             
             base_name = os.path.basename(mra_path).replace(".png", "")
+            base_name = base_name[:-4]
             r_path = os.path.join(target_folder, f"{base_name}_Metalness.png")
             g_path = os.path.join(target_folder, f"{base_name}_Roughness.png")
             b_path = os.path.join(target_folder, f"{base_name}_AO.png")
+            
             
             r.save(r_path)
             g.save(g_path)
