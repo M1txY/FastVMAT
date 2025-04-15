@@ -1,0 +1,322 @@
+import bpy
+import os
+import shutil
+from pathlib import Path
+from PIL import Image
+
+def get_texture_nodes_from_material(mat):
+    """Get all texture nodes from a material"""
+    textures = {}
+    if mat.use_nodes:
+        for node in mat.node_tree.nodes:
+            if node.type == 'TEX_IMAGE' and node.image:
+                # Determine texture type based on node connections
+                for output in node.outputs:
+                    for link in output.links:
+                        if link.to_socket.name.lower() == 'base color' or link.to_socket.name.lower() == 'color':
+                            textures['color'] = node.image
+                        elif link.to_socket.name.lower() == 'alpha':
+                            textures['alpha'] = node.image
+                        elif link.to_socket.name.lower() == 'normal':
+                            textures['normal'] = node.image
+                        elif link.to_socket.name.lower() == 'roughness':
+                            textures['roughness'] = node.image
+                        elif link.to_socket.name.lower() == 'metallic':
+                            textures['metallic'] = node.image
+    return textures
+
+def convert_dds_to_png_path(path):
+    """Convert .dds path to .png path"""
+    if path.lower().endswith('.dds'):
+        return path[:-4] + '.png'
+    return path
+
+def export_textures(fbx_name, output_dir):
+    """Export all textures as PNG to the textures directory"""
+    textures_dir = os.path.join(output_dir, 'textures', fbx_name)
+    os.makedirs(textures_dir, exist_ok=True)
+    
+    texture_data = {}
+    
+    for mat in bpy.data.materials:
+        textures = get_texture_nodes_from_material(mat)
+        mat_data = {}
+        
+        for tex_type, image in textures.items():
+            # Get absolute path
+            abs_path = bpy.path.abspath(image.filepath)
+            if os.path.exists(abs_path):
+                # Convert to PNG if it's DDS
+                new_filename = os.path.basename(convert_dds_to_png_path(abs_path))
+                
+                # For alpha textures, add _trans suffix
+                if tex_type == 'alpha':
+                    base_name = os.path.splitext(new_filename)[0]
+                    new_filename = f"{base_name}_trans.png"
+                
+                img = Image.open(abs_path)
+                output_path = os.path.join(textures_dir, new_filename)
+                img.save(output_path)
+                
+                mat_data[tex_type] = os.path.join('textures', fbx_name, new_filename).replace('\\', '/')
+        
+        if mat_data:
+            texture_data[mat.name] = mat_data
+    
+    return texture_data
+def create_vmat(material_name, texture_data, output_dir, fbx_name):
+    """Create a VMAT file for the material"""
+
+    # Default texture paths
+    color_texture = texture_data.get('color', "materials/default/default_color.tga")
+    normal_texture = 'TextureNormal "materials/default/default_normal.tga"'
+    translucent_section = ''
+
+    # Check for normal map
+    if 'normal' in texture_data:
+        normal_texture = f'TextureNormal "{texture_data["normal"]}"'
+    
+    # Check for alpha/transparency
+    if 'alpha' in texture_data:
+        translucent_section = f"""
+    //---- Translucent ----
+    g_flAlphaTestReference "0.500"
+    g_flAntiAliasedEdgeStrength "1.000"
+    TextureTranslucency "{texture_data['alpha']}\""""
+    
+    # Format the VMAT content
+    vmat_content = f"""Layer0
+{{
+    shader "shaders/complex.shader"
+
+    //---- Ambient Occlusion ----
+    g_flAmbientOcclusionDirectDiffuse "0.000"
+    g_flAmbientOcclusionDirectSpecular "0.000"
+    TextureAmbientOcclusion "materials/default/default_ao.tga"
+
+    //---- Color ----
+    g_flModelTintAmount "1.000"
+    g_vColorTint "[1.000000 1.000000 1.000000 0.000000]"
+    TextureColor "{color_texture}"
+
+    //---- Fade ----
+    g_flFadeExponent "1.000"
+
+    //---- Fog ----
+    g_bFogEnabled "1"
+
+    //---- Metalness ----
+    g_flMetalness "0.000"
+
+    //---- Normal ----
+    {normal_texture}
+
+    //---- Roughness ----
+    g_flRoughnessScaleFactor "1.000"
+    TextureRoughness "materials/default/default_rough.tga"
+
+    //---- Texture Coordinates ----
+    g_nScaleTexCoordUByModelScaleAxis "0"
+    g_nScaleTexCoordVByModelScaleAxis "0"
+    g_vTexCoordOffset "[0.000 0.000]"
+    g_vTexCoordScale "[1.000 1.000]"
+    g_vTexCoordScrollSpeed "[0.000 0.000]"
+    
+    {translucent_section}
+}}"""
+
+    materials_dir = os.path.join(output_dir, f'materials/{fbx_name}/')
+    os.makedirs(materials_dir, exist_ok=True)
+    
+    vmat_path = os.path.join(materials_dir, f"{material_name.lower()}.vmat")
+    with open(vmat_path, 'w') as f:
+        f.write(vmat_content)
+    
+    return vmat_path
+
+def create_vmdl(fbx_name, materials, output_dir):
+    """Create a VMDL file referencing all the materials"""
+    vmdl_content = f"""<!-- kv3 encoding:text:version{{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}} format:modeldoc29:version{{3cec427c-1b0e-4d48-a90a-0436f33a6041}} -->
+{{
+    rootNode = 
+    {{
+        _class = "RootNode"
+        children = 
+        [
+            {{
+                _class = "MaterialGroupList"
+                children = 
+                [
+                    {{
+                        _class = "DefaultMaterialGroup"
+                        remaps = 
+                        ["""
+    
+    # Add material remaps
+    for mat_name, vmat_path in materials.items():
+        vmdl_content += f"""
+                            {{
+                                from = "{mat_name}.vmat"
+                                to = "materials/{fbx_name}/{mat_name}.vmat"
+                            }},"""
+    
+    vmdl_content += f"""
+                        ]
+                        use_global_default = false
+                        global_default_material = "materials/default.vmat"
+                    }},
+                ]
+            }},
+            {{
+                _class = "RenderMeshList"
+                children = 
+                [
+                    {{
+                        _class = "RenderMeshFile"
+                        filename = "models/{fbx_name}/{fbx_name}.fbx"
+                        import_translation = [ 0.0, 0.0, 0.0 ]
+                        import_rotation = [ 0.0, 0.0, 0.0 ]
+                        import_scale = 1
+                        align_origin_x_type = "None"
+                        align_origin_y_type = "None"
+                        align_origin_z_type = "None"
+                        parent_bone = ""
+                        import_filter = 
+                        {{
+                            exclude_by_default = false
+                            exception_list = []
+                        }}
+                    }},
+                ]
+            }},
+            {{
+                _class = "ModelModifierList"
+                children = 
+                [
+                    {{
+                        _class = "ModelModifier_ScaleAndMirror"
+                        scale = 39.369999
+                        mirror_x = false
+                        mirror_y = false
+                        mirror_z = false
+                        flip_bone_forward = false
+                        swap_left_and_right_bones = false
+                    }},
+                ]
+            }},
+        ]
+        model_archetype = ""
+        primary_associated_entity = ""
+        anim_graph_name = ""
+        base_model_name = ""
+    }}
+}}"""
+    
+    vmdl_path = os.path.join(output_dir, f"{fbx_name}.vmdl")
+    with open(vmdl_path, 'w') as f:
+        f.write(vmdl_content)
+    
+    return vmdl_path
+
+def export_fbx_to_vmdl(context, output_dir):
+    """Main export function"""
+    # Get active object name as FBX name
+    fbx_name = bpy.context.active_object.name if bpy.context.active_object else "model"
+    
+    # Create directory structure
+    models_dir = os.path.join(output_dir, 'models', fbx_name)
+    os.makedirs(models_dir, exist_ok=True)
+    
+    # Export textures
+    texture_data = export_textures(fbx_name, output_dir)
+    
+    # Create VMAT files for each material
+    vmat_paths = {}
+    for mat in bpy.data.materials:
+        if mat.name in texture_data:
+            vmat_path = create_vmat(mat.name, texture_data[mat.name], output_dir, fbx_name)
+            vmat_paths[mat.name] = vmat_path.replace('\\', '/')  # Use forward slashes
+    
+    # Export FBX
+    fbx_path = os.path.join(models_dir, f"{fbx_name}.fbx")
+    bpy.ops.export_scene.fbx(
+        filepath=fbx_path,
+        use_selection=False,
+        use_active_collection=False,
+        global_scale=39.37,
+        apply_unit_scale=True,
+        apply_scale_options='FBX_SCALE_UNITS',
+        bake_space_transform=False,
+        object_types={'MESH', 'EMPTY'},
+        use_mesh_modifiers=True,
+        use_mesh_modifiers_render=True,
+        mesh_smooth_type='OFF',
+        use_subsurf=False,
+        use_mesh_edges=False,
+        use_tspace=False,
+        use_custom_props=False,
+        add_leaf_bones=False,
+        primary_bone_axis='Y',
+        secondary_bone_axis='X',
+        use_armature_deform_only=False,
+        armature_nodetype='NULL',
+        bake_anim=False,
+        bake_anim_use_all_bones=False,
+        bake_anim_use_nla_strips=False,
+        bake_anim_use_all_actions=False,
+        bake_anim_force_startend_keying=False,
+        bake_anim_step=1.0,
+        bake_anim_simplify_factor=1.0,
+        path_mode='AUTO',
+        embed_textures=False,
+        batch_mode='OFF',
+        use_batch_own_dir=True,
+        use_metadata=True,
+        axis_forward='-Z',
+        axis_up='Y'
+    )
+    
+    # Create VMDL file
+    vmdl_path = create_vmdl(fbx_name, vmat_paths, output_dir)
+    
+    return {'FINISHED'}
+
+class ExportVMDLOperator(bpy.types.Operator):
+    """Export to VMDL format with materials"""
+    bl_idname = "export_scene.vmdl"
+    bl_label = "Export VMDL"
+    
+    directory: bpy.props.StringProperty(subtype='DIR_PATH')
+    
+    def execute(self, context):
+        return export_fbx_to_vmdl(context, self.directory)
+    
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+def menu_func_export(self, context):
+    self.layout.operator(ExportVMDLOperator.bl_idname, text="VMDL Export (.vmdl)")
+
+def register():
+    bpy.utils.register_class(ExportVMDLOperator)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
+
+def unregister():
+    bpy.utils.unregister_class(ExportVMDLOperator)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+
+bl_info = {
+    "name": "FBX to VMDL/VMAT Exporter",
+    "author": "kekobka",
+    "version": (1, 2),
+    "blender": (2, 93, 0),
+    "location": "File > Export",
+    "description": "Export FBX to VMDL with VMAT materials (custom texture paths and DDS to PNG conversion)",
+    "warning": "",
+    "doc_url": "",
+    "category": "Import-Export",
+}
+
+if __name__ == "__main__":
+    register()
