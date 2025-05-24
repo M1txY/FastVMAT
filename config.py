@@ -1,4 +1,3 @@
-# Mapping des textures avec leurs suffixes associés
 
 TEXTURE_MAPPING = {
     "TextureColor": ["_albedo", "_diffuse", "_basecolor", "_color", "_col", "_bc", "_diff", "_a"],
@@ -10,7 +9,7 @@ TEXTURE_MAPPING = {
     "TextureTranslucency": ["_translucent", "_trans", "_opacity", "_opa", "_alpha"]
 }
 
-# Paramètres par défaut pour les fichiers .vmat
+
 DEFAULT_PARAMETERS = {
     "shader": "complex.shader",
     "g_flAmbientOcclusionDirectDiffuse": "0.000",

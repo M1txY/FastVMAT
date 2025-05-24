@@ -9,8 +9,12 @@ def convert_dss_to_png(source_path, target_path):
     Converts a .dss file to .png.
     """
     try:
-        # Placeholder: Pillow may not support .dss directly. 
-        # Replace with appropriate conversion logic or tool if needed.
+        
+        
+        
+        
+        
+        
         with Image.open(source_path) as img:
             img.save(target_path, format="PNG")
         print(f"Converted {source_path} to {target_path}")
@@ -26,7 +30,9 @@ def process_dss_files(source_folder, target_folder):
             source_path = os.path.join(source_folder, file)
             target_path = os.path.join(target_folder, file.replace(".dss", ".png"))
             convert_dss_to_png(source_path, target_path)
-            os.remove(source_path)  # Cleanup the original .dss file
+            os.remove(source_path)  
+            
+            
 
 def split_channels(image_path, target_folder):
     """
@@ -43,7 +49,9 @@ def split_channels(image_path, target_folder):
                 color.save(channel_path)
                 paths[channel] = channel_path
 
-            os.remove(image_path)  # Remove the original file
+            os.remove(image_path)  
+            
+            
             return paths
     except Exception as e:
         print(f"Error processing {image_path}: {e}")
@@ -98,7 +106,11 @@ def assign_textures(folder_path):
         if file.endswith((".png", ".jpg", ".jpeg", ".tga")):
             for key, suffixes in TEXTURE_MAPPING.items():
                 if any(suffix in file.lower() for suffix in suffixes):
-                    textures[key] = os.path.relpath(os.path.join(folder_path, file), "materials").replace("\\", "/")
+                    
+                    
+                    
+                    relative_path = os.path.relpath(os.path.join(folder_path, file), "materials").replace("\\", "/")
+                    textures[key] = relative_path
                     break
     return textures
 
@@ -134,6 +146,19 @@ def process_folder(folder_path, umodel_path):
     """
     Processes a single folder to extract textures and generate a .vmat file.
     """
+    
+    
+    
+    has_textures = any(
+        file.endswith((".png", ".jpg", ".jpeg", ".tga", ".uasset"))
+        for file in os.listdir(folder_path)
+    )
+    
+    if not has_textures:
+        return
+    
+    print(f"Processing folder: {folder_path}")
+    
     extract_textures(umodel_path, folder_path)
     options = {
         "F_SPECULAR": False,
@@ -148,7 +173,21 @@ def process_folder(folder_path, umodel_path):
     textures = assign_textures(folder_path)
     textures.update(mra_textures)
 
-    generate_vmat(folder_path, textures, options)
+    if textures:  
+        
+        
+        generate_vmat(folder_path, textures, options)
+
+def scan_directories_recursively(root_folder, umodel_path):
+    """
+    Scanne récursivement tous les dossiers dans le répertoire materials.
+    """
+    for root, dirs, files in os.walk(root_folder):
+        
+        
+        
+        if files:
+            process_folder(root, umodel_path)
 
 def main():
     root_folder = "materials"
@@ -158,10 +197,9 @@ def main():
         print(f"Root folder '{root_folder}' not found.")
         return
 
-    for folder_name in os.listdir(root_folder):
-        folder_path = os.path.join(root_folder, folder_name)
-        if os.path.isdir(folder_path):
-            process_folder(folder_path, umodel_path)
+    print(f"Scanning directory structure in '{root_folder}'...")
+    scan_directories_recursively(root_folder, umodel_path)
+    print("Processing complete!")
 
 if __name__ == "__main__":
     main()
